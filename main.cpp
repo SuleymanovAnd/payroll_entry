@@ -6,13 +6,10 @@ using namespace std;
 
 void name_check (std::string &name);
 void data_check (std::string &data);
+bool overflow ();
 
 int main() {
-   ofstream in_file ("payroll.txt");
 
-   if (!in_file.is_open()){
-       cout << "error!";
-   }
 
    string name;
    string surname;
@@ -40,20 +37,32 @@ int main() {
 
     // проверка даты
     data_check (data);
+
     //ввод зарплаты
     cout << "Enter payment: ";
     cin >> payment;
 
+   while  (overflow ()) {cin >> payment;}
+
+   // открываем поток на запись
+    std::ofstream in_file ("payroll.txt",ios::app);
+
+    if (!in_file.is_open()){
+        cout << "error!";
+    }
 
 
-
-   // вывод в файл
+   // вывод на экран
+    cout << name << " " << surname << " " << data << " " << payment << std::endl;
+    // вывод в файл
+    in_file << name << " " << surname << " " << data << " " << payment << std::endl;
+    in_file.close ();
 }
 // функция проверки на буквы в имени
 bool consist_of_letters (std::string &name){
-    for (int i = 0; i < name.length ();){
+    for (int i = 0; i < name.length ();i++){
         bool is_letter = (name [i]>= 'A' && name [i] <= 'Z'|| name[i] >= 'a' && name [i] <= 'z');
-        if (!is_letter) {return false;}
+        if (!is_letter) {;return false; }
     }
     return true;
 }
@@ -61,23 +70,24 @@ bool consist_of_letters (std::string &name){
 //функция для проверки состоит ли дата из точек и цифер.
 bool consist_of_num (std::string &data) {
     int count_point = 0;
-    for (int i = 0; i < data.length ();){
+    for (int i = 0; i < data.length ();i++){
         bool is_number = isdigit(data [i]);
-        bool is_point = (data [2] == '.' || data [5] == '.');
+        bool is_point = (data [i] == '.');
         if (is_point) {count_point ++;}
-        if (!is_number && !is_point) {return false;}
-        if (count_point != 2) {return false;}
+        if (!is_number && !is_point) {;return false;}
     }
+    if (data[2] != '.' || data [5] != '.') {return false;}
+    if (count_point != 2) {;return false;}
     return true;
 }
 
 // функция проверки имени
 void name_check (std::string &name){
 
-    bool size_correct = name.size() < 35 || name.size() > 2;
+    bool size_correct = name.size() < 35 && name.size() > 2;
     bool letters_correct = consist_of_letters(name);
 
-    while (!size_correct && !letters_correct)  {
+    while (!size_correct || !letters_correct)  {
         // Проверка на длину.
         while (name.size() > 35 || name.size() < 2) {
             if (name.size() > 35) { // если имя больше 35 символов.
@@ -97,7 +107,7 @@ void name_check (std::string &name){
             cin >> name;
         }
         // проверка условий
-        size_correct = name.size() < 35 || name.size() > 2;
+        size_correct = name.size() < 35 && name.size() > 2;
         letters_correct = consist_of_letters(name);
     }
 
@@ -122,6 +132,14 @@ bool day_correct (int month, int year, int day){
 }
 // определяем корректность даты
 void data_check (std::string &data){
+    bool correct_format = consist_of_num (data);
+
+    while (!correct_format){
+        cout << "Data the date must contain only numbers and be in the format DD.MM.YYYY. Input again: ";
+        cin >> data;
+        correct_format = consist_of_num(data);
+    }
+
     int day = stoi (data.substr(0,2));
     int month = stoi (data.substr(3,2));
     int year = stoi (data.substr(6,4));
@@ -131,34 +149,58 @@ void data_check (std::string &data){
     bool correct_year = year > 1990 && year < 2022 ;
     bool correct_day = day_correct(month,year,day);
 
-    bool correct_format = consist_of_num (data);
-
       bool all_correct = correct_format && correct_month && correct_year && correct_day;
       while (!all_correct) {
-          while (!correct_format) {
+          while (!correct_format) { // дополнительная проверка если
               cout << "Data the date must contain only numbers and be in the format DD.MM.YYYY. Input again: ";
               cin >> data;
               correct_format = consist_of_num(data);
           }
-          while (!correct_month && !correct_day && !correct_year) {
+
+          while (!correct_month || !correct_day || !correct_year) {
+
               while (!correct_day) {
+
                   cout << "invalid value for day. Enter again: ";
                   cin >> data;
+
+                  day = stoi (data.substr(0,2));
+                  month = stoi (data.substr(3,2));
+                  year = stoi (data.substr(6,4));
                   correct_day = day_correct(month,year,day);
               }
               while (!correct_month){
                   cout << "invalid value for month. Enter again: ";
                   cin >> data;
+
+                  day = stoi (data.substr(0,2));
+                  month = stoi (data.substr(3,2));
+                  year = stoi (data.substr(6,4));
                   correct_month = month > 0 && month <= 12;
               }
               while (!correct_year){
                   cout << "invalid value for year. Enter again: ";
                   cin >> data;
+
+                  day = stoi (data.substr(0,2));
+                  month = stoi (data.substr(3,2));
+                  year = stoi (data.substr(6,4));
                   correct_year = year > 1990 && year < 2022;
               }
-
               correct_format = consist_of_num (data);
           }
           all_correct = correct_format && correct_month && correct_year && correct_day;
       }
+}
+
+bool overflow ( ){
+
+    if (! std::cin){
+        std::cout <<"Input Error. Enter again: ";
+        std::cin.clear();
+        std::cin.ignore(1000, '\n');
+
+        return true;
+    } else{ return false;
+    }
 }
