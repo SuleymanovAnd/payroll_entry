@@ -1,4 +1,4 @@
-# Install script for directory: E:/SkillboxProject/20_practice/payroll_entry
+# Install script for directory: E:/SkillboxProject/21_practice/payroll_struct
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "E:/SkillboxProject/20_practice/payroll_entry/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "E:/SkillboxProject/21_practice/payroll_struct/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

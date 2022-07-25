@@ -3,60 +3,100 @@
 #include <cctype>
 using namespace std;
 
-
+struct payroll {
+    string name;
+    string surname;
+    string data;
+    int payment = 0;
+};
 void name_check (std::string &name);
 void data_check (std::string &data);
 bool overflow ();
 
 int main() {
 
+    string command;
+    cout << ": ";
+    cin >> command;
 
-   string name;
-   string surname;
-   int payment;
-   string data;
-
-   //ввод данных
-        //Ввод имени
-    cout << "Enter name: ";
-    cin >> name;
-
-    // Проверка имени.
-        name_check (name);
-
-    // Ввод фамилии
-    cout << "Enter surname: ";
-    cin >> surname;
-
-    //проверка фамилии
-        name_check (surname);
-
-    //ввод даты
-    cout << "Enter data (DD,MM,YYYY): ";
-    cin >> data;
-
-    // проверка даты
-    data_check (data);
-
-    //ввод зарплаты
-    cout << "Enter payment: ";
-    cin >> payment;
-
-   while  (overflow ()) {cin >> payment;}
-
-   // открываем поток на запись
-    std::ofstream in_file ("payroll.txt",ios::app);
-
-    if (!in_file.is_open()){
-        cout << "error!";
+    while (command != "list" && command != "add") {
+        cout << "Incorrect command. Try again: ";
+        cin >> command;
     }
 
 
-   // вывод на экран
-    cout << name << " " << surname << " " << data << " " << payment << std::endl;
-    // вывод в файл
-    in_file << name << " " << surname << " " << data << " " << payment << std::endl;
-    in_file.close ();
+    if (command  == "list") {
+        std::ifstream out_file ( "payroll.txt");
+        payroll person;
+
+        if (!out_file.is_open ()) {
+            cout << "file open error.";
+        } else {
+            for (int i =0; i < 4 && !out_file.eof();i++){
+                std::string buffer;
+                out_file >> buffer;
+                if (i == 0) {person.name = buffer;}
+                if (i == 1) {person.surname = buffer;}
+                if (i == 2) {person.data = buffer;}
+                try {
+                    if (i == 3) {
+                        int temp = std::stoi(buffer);
+                        person.payment = temp;
+                        i = -1;
+                        // вывод на экран
+                        cout << person.name << " " << person.surname << " " << person.data << " " <<person.payment << endl;
+                    }
+                }catch (const std::exception& obj)
+                {
+                    std::cerr << obj.what();
+                }
+
+            }
+            out_file.close ();
+        }
+
+    } else if (command == "add") {
+        payroll person;
+
+        //ввод данных
+        //Ввод имени
+        cout << "Enter name: ";
+        cin >> person.name;
+
+        // Проверка имени.
+        name_check (person.name);
+
+        // Ввод фамилии
+        cout << "Enter surname: ";
+        cin >> person.surname;
+
+        //проверка фамилии
+        name_check (person.surname);
+
+        //ввод даты
+        cout << "Enter data (DD,MM,YYYY): ";
+        cin >> person.data;
+
+        // проверка даты
+        data_check (person.data);
+
+        //ввод зарплаты
+        cout << "Enter payment: ";
+        cin >> person.payment;
+        while  (overflow ()) {cin >> person.payment;}
+
+        // открываем поток на запись
+        std::ofstream in_file ("payroll.txt",ios::app);
+
+        // вывод в файл
+        if (!in_file.is_open()){
+            cout << "file open error!";
+        } else {
+            in_file << person.name << " " << person.surname << " " << person.data << " " << person.payment << std::endl;
+        }
+        in_file.close ();
+    }
+
 }
 // функция проверки на буквы в имени
 bool consist_of_letters (std::string &name){
